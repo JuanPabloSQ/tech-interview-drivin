@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { DataGrid } from '@mui/x-data-grid';
+import IconButton from '@mui/material/IconButton';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { Box } from '@mui/material';
 
 const columns = [
   { field: 'class', headerName: 'Tipo de Auto', width: 150 },
@@ -24,11 +27,11 @@ const fetchCarData = async (setRows) => {
         'X-Api-Key': apiKey,
       },
       params: {
-        limit: 20, 
-        fuel_type: 'gas', 
+        limit: 50,
+        fuel_type: 'gas',
       },
     });
-    setRows(response.data);
+    setRows(response.data.map((item, index) => ({ ...item, id: index })));
   } catch (error) {
     console.error('Error fetching data:', error.response ? error.response.data : error.message);
   }
@@ -36,24 +39,32 @@ const fetchCarData = async (setRows) => {
 
 const Table = () => {
   const [rows, setRows] = useState([]);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     fetchCarData(setRows);
   }, []);
 
   return (
-    <div style={{ height: 600, width: '100%' }}>
+    <div style={{ width: '100%' }}>
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <IconButton aria-label="filter">
+          <FilterListIcon />
+        </IconButton>
+      </Box>
       <DataGrid
+        autoHeight
         rows={rows}
         columns={columns}
-        getRowId={(row) => row.id || `${row.make}-${row.model}-${row.year}`}
+        getRowId={(row) => row.id}
         initialState={{
           pagination: {
             paginationModel: { page: 0, pageSize: 20 },
           },
         }}
         pageSizeOptions={[20]}
-        checkboxSelection
+        page={page}
+        onPageChange={(newPage) => setPage(newPage)}
       />
     </div>
   );
