@@ -6,7 +6,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import TablePagination from '@mui/material/TablePagination';
 import { Box, Paper, Typography, TextField, MenuItem } from '@mui/material';
 import Modal from './Modal';
-import LocationModal from './LocationModal'; 
+import LocationModal from './LocationModal';
 
 const mpgToKml = (mpg) => (mpg * 0.425144).toFixed(2);
 
@@ -32,36 +32,6 @@ const fuelTypeTranslations = {
   'gas': 'Gasolina',
   'diesel': 'Diesel',
   'electricity': 'Electricidad',
-};
-
-const makeOptions = {
-  'gas': [
-    'Alfa Romeo', 'Ferrari', 'Dodge', 'Subaru', 'Toyota', 'Volkswagen', 'Volvo', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Cx Automotive', 'Nissan'
-  ],
-  'diesel': [
-    'Mercedes-Benz', 'GMC', 'Chevrolet', 'Grumman Olson', 'Ford', 'Jeep'
-  ],
-  'electricity': [
-    'Nissan', 'Toyota', 'Ford', 'GMC', 'Honda', 'Dodge', 'Plymouth', 'Chevrolet', 'Mini', 'Smart', 'Mitsubishi', 'Azure Dynamics', 'BMW', 'Coda Automotive', 'Tesla', 'Scion', 'Byd', 'Fiat'
-  ]
-};
-
-const modelOptions = {
-  'gas': [
-    'Spider veloce 2000', 'Testarossa', 'Charger', 'B150/b250 wagon 2wd', 'Legacy awd turbo', 'Loyale', 'Corolla', 'Golf iii / gti', 'Jetta iii', '240', '100', '740i', '740il', '750il', 'Century', 'Regal', 'Riviera', 'Eldorado', 'Seville', 'Lumina', 'New yorker', 'Xm v6', 'Xm v6a', 'Maxima', 'Dynasty'
-  ],
-  'diesel': [
-    '300sd', 'G15/25 rally 2wd', 'K1500 pickup 4wd', 'Pickup 2500 4wd', 'Suburban c10 2wd', 'Sierra 1500 4wd', 'Sierra 2500 4wd', 'C15 suburban 2wd', 'Kubvan', 'K10 blazer 4wd', 'Suburban k10 4wd', 'Bronco ii 4wd', 'K15 jimmy 4wd', 'S350d', 'K15 suburban 4wd', 'Cherokee/wagoneer', 'C1500 pickup 2wd', 'Pickup 2500 2wd', 'Sierra 1500 2wd', 'Sierra 2500 2wd', 'G10/20 van 2wd', 'Vandura g15/25 2wd', 'Sport van g10/20 2wd', 'Rally g15/25 2wd', 'Blazer 1500 4wd', 'Yukon k1500 4wd', 'S350'
-  ],
-  'electricity': [
-    'Altra ev', 'Rav4 ev', 'Th!nk', 'Explorer usps electric', 'Hyper-mini', 'Ranger pickup 2wd', 'Ev1', 'Ev plus', 'Caravan/grand caravan 2wd', 'Voyager/grand voyager 2wd', 'S10 electric', 'Minie', 'Leaf', 'Fortwo electric drive cabriolet', 'Fortwo electric drive coupe', 'I-miev', 'Transit connect electric van/wagon', 'Active e', 'Coda', 'Focus electric', 'Model s', 'Fit ev', 'Fortwo electric drive convertible', 'Iq ev', 'Model s (60 kw-hr battery pack)', 'Model s (85 kw-hr battery pack)', 'E6', '500e', 'Model s (40 kw-hr battery pack)', 'Spark ev'
-  ]
-};
-
-const yearOptions = {
-  'gas': [1985, 1993],
-  'diesel': [1985, 1993, 1994, 1995],
-  'electricity': [1998, 1999, 2000, 2001, 2002, 2003, 2008, 2011, 2012, 2013, 2014]
 };
 
 const Table = () => {
@@ -189,10 +159,15 @@ const Table = () => {
 
       setFilterOptions({ types, makes, models, years, transmissions });
       setOriginalRows(data);
-      setRows(data);
+      setRows(applyTypeFilter(data, filtersToApply.type));
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
     }
+  };
+
+  const applyTypeFilter = (data, type) => {
+    if (!type) return data;
+    return data.filter(row => row.class === type);
   };
 
   useEffect(() => {
@@ -224,8 +199,7 @@ const Table = () => {
   const applyFilters = () => {
     setFilters(tempFilters);
 
-    const filteredRows = originalRows.filter(row =>
-      (!tempFilters.type || row.class === tempFilters.type) &&
+    const filteredRows = applyTypeFilter(originalRows, tempFilters.type).filter(row =>
       (!tempFilters.make || row.make === tempFilters.make) &&
       (!tempFilters.model || row.model === tempFilters.model) &&
       (!tempFilters.year || row.year === tempFilters.year) &&
@@ -239,7 +213,9 @@ const Table = () => {
   };
 
   const resetFilters = () => {
-    setTempFilters({ type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
+    const initialFilters = { type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] };
+    setTempFilters(initialFilters);
+    setFilters(initialFilters);
     setRows(originalRows);
   };
 
@@ -350,12 +326,7 @@ const Table = () => {
       <Modal
         open={modalOpen}
         handleClose={handleCloseModal}
-        filterOptions={{ 
-          ...filterOptions, 
-          makes: makeOptions[filters.fuel_type], 
-          models: modelOptions[filters.fuel_type],
-          years: yearOptions[filters.fuel_type],
-        }}
+        filterOptions={filterOptions}
         filters={tempFilters}
         setFilters={setTempFilters}
         applyFilters={applyFilters}

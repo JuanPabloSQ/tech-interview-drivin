@@ -1,4 +1,5 @@
-import { Box, Modal as MUIModal, Typography, Button, TextField, MenuItem, Slider } from '@mui/material';
+import { useState } from 'react';
+import { Box, Modal as MUIModal, Typography, Button, TextField, Slider, MenuItem } from '@mui/material';
 
 const style = {
   position: 'absolute',
@@ -21,23 +22,64 @@ const style = {
   },
 };
 
+const typeTranslations = {
+  'biplaza': 'two seater',
+  'subcompacto': 'subcompact car',
+  'furgoneta': 'van',
+  'compacto': 'compact car',
+  'mediano': 'midsize car',
+  'grande': 'large car',
+  'camioneta estándar': 'standard pickup truck',
+  'vehículo de propósito especial': 'special purpose vehicle',
+  'station wagon mediano': 'midsize station wagon',
+  'vehículo utilitario deportivo': 'sport utility vehicle',
+  'minivan': 'minivan',
+  'camioneta pequeña': 'small pickup truck',
+  'minicompacto': 'minicompact car',
+  'station wagon pequeño': 'small station wagon',
+  'vehículo utilitario deportivo pequeño': 'small sport utility vehicle',
+};
+
+const translateType = (type) => {
+  return typeTranslations[type.toLowerCase()] || type.toLowerCase();
+};
+
 const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFilters, resetFilters }) => {
-  const typeTranslations = {
-    'two seater': 'Biplaza',
-    'subcompact car': 'Subcompacto',
-    'van': 'Furgoneta',
-    'compact car': 'Compacto',
-    'midsize car': 'Mediano',
-    'large car': 'Grande',
-    'standard pickup truck': 'Camioneta estándar',
-    'special purpose vehicle': 'Vehículo de propósito especial',
-    'midsize station wagon': 'Station wagon mediano',
-    'sport utility vehicle': 'Vehículo utilitario deportivo',
-    'minivan': 'Minivan',
-    'small pickup truck': 'Camioneta pequeña',
-    'minicompact car': 'Minicompacto',
-    'small station wagon': 'Station wagon pequeño',
-    'small sport utility vehicle': 'Vehículo utilitario deportivo pequeño',
+  const [inputType, setInputType] = useState(filters.type);
+  const [inputMake, setInputMake] = useState(filters.make);
+  const [inputModel, setInputModel] = useState(filters.model);
+  const [inputYear, setInputYear] = useState(filters.year);
+
+  const handleTypeChange = (e) => {
+    const inputValue = e.target.value;
+    setInputType(inputValue);
+    setFilters((prev) => ({ ...prev, type: translateType(inputValue) }));
+  };
+
+  const handleMakeChange = (e) => {
+    const inputValue = e.target.value.toLowerCase();
+    setInputMake(inputValue);
+    setFilters((prev) => ({ ...prev, make: inputValue, model: '' }));
+  };
+
+  const handleModelChange = (e) => {
+    const inputValue = e.target.value.toLowerCase();
+    setInputModel(inputValue);
+    setFilters((prev) => ({ ...prev, model: inputValue }));
+  };
+
+  const handleYearChange = (e) => {
+    const inputValue = e.target.value;
+    setInputYear(inputValue);
+    setFilters((prev) => ({ ...prev, year: inputValue }));
+  };
+
+  const handleResetFilters = () => {
+    setInputType('');
+    setInputMake('');
+    setInputModel('');
+    setInputYear('');
+    resetFilters();
   };
 
   return (
@@ -48,71 +90,33 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
         </Typography>
         <Box component="form" sx={{ mt: 2 }}>
           <TextField
-            select
             label="Tipo de Auto"
-            value={filters.type}
-            onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+            value={inputType}
+            onChange={handleTypeChange}
             fullWidth
             margin="dense"
-          >
-            <MenuItem value="">Ninguna</MenuItem>
-            {filterOptions.types.map((option) => (
-              option && (
-                <MenuItem key={option} value={option}>
-                  {typeTranslations[option] || option.charAt(0).toUpperCase() + option.slice(1)}
-                </MenuItem>
-              )
-            ))}
-          </TextField>
+          />
           <TextField
-            select
             label="Marca"
-            value={filters.make}
-            onChange={(e) => setFilters((prev) => ({ ...prev, make: e.target.value, model: '' }))}
+            value={inputMake}
+            onChange={handleMakeChange}
             fullWidth
             margin="dense"
-          >
-            <MenuItem value="">Ninguna</MenuItem>
-            {filterOptions.makes.map((option) => (
-              option && (
-                <MenuItem key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </MenuItem>
-              )
-            ))}
-          </TextField>
+          />
           <TextField
-            select
             label="Modelo"
-            value={filters.model}
-            onChange={(e) => setFilters((prev) => ({ ...prev, model: e.target.value }))}
+            value={inputModel}
+            onChange={handleModelChange}
             fullWidth
             margin="dense"
-          >
-            <MenuItem value="">Ninguna</MenuItem>
-            {filterOptions.models.map((option) => (
-              option && (
-                <MenuItem key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </MenuItem>
-              )
-            ))}
-          </TextField>
+          />
           <TextField
-            select
             label="Año"
-            value={filters.year}
-            onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value }))}
+            value={inputYear}
+            onChange={handleYearChange}
             fullWidth
             margin="dense"
-          >
-            <MenuItem value="">Ninguna</MenuItem>
-            {filterOptions.years.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
+          />
           <TextField
             select
             label="Tipo de Transmisión"
@@ -171,7 +175,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             ]}
           />
           <Box display="flex" justifyContent="space-between" mt={2}>
-            <Button onClick={resetFilters} sx={{ mr: 1 }}>
+            <Button onClick={handleResetFilters} sx={{ mr: 1 }}>
               Reiniciar
             </Button>
             <Box>
@@ -179,7 +183,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
                 Cancelar
               </Button>
               <Button variant="contained" onClick={applyFilters}>
-                Aplicar 
+                Aplicar
               </Button>
             </Box>
           </Box>
