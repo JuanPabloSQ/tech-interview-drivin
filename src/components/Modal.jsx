@@ -18,11 +18,9 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
     <MUIModal
       open={open}
       onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
     >
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
+        <Typography variant="h6" component="h2">
           Filtrar Resultados
         </Typography>
         <Box component="form" sx={{ mt: 2 }}>

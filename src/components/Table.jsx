@@ -3,58 +3,80 @@ import axios from 'axios';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { Box } from '@mui/material';
-import Modal from './Modal'; 
-
-const columns = [
-  { field: 'class', headerName: 'Tipo de Auto', width: 150 },
-  { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150 },
-  { field: 'make', headerName: 'Marca', width: 130 },
-  { field: 'model', headerName: 'Modelo', width: 130 },
-  { field: 'year', headerName: 'Año', width: 90, type: 'number' },
-  { field: 'transmission', headerName: 'Tipo de Transmisión', width: 180 },
-  { field: 'city_mpg', headerName: 'Consumo en Ciudad (mpg)', width: 180, type: 'number' },
-  { field: 'highway_mpg', headerName: 'Consumo en Carretera (mpg)', width: 180, type: 'number' },
-  { field: 'combination_mpg', headerName: 'Consumo Mixto (mpg)', width: 180, type: 'number' },
-];
-
-const fetchCarData = async (setRows, setOriginalRows, setFilterOptions) => {
-  const apiUrl = `https://api.api-ninjas.com/v1/cars`;
-  const apiKey = import.meta.env.VITE_API_KEY;
-  
-  try {
-    const response = await axios.get(apiUrl, {
-      headers: {
-        'X-Api-Key': apiKey,
-      },
-      params: {
-        limit: 50,
-        fuel_type: 'gas',
-      },
-    });
-    const data = response.data.map((item, index) => ({ ...item, id: index }));
-
-    const types = [...new Set(data.map(item => item.class))];
-    const makes = [...new Set(data.map(item => item.make))];
-    const models = [...new Set(data.map(item => item.model))];
-    const years = [...new Set(data.map(item => item.year))];
-    const transmissions = [...new Set(data.map(item => item.transmission))];
-
-    setFilterOptions({ types, makes, models, years, transmissions });
-    setRows(data);
-    setOriginalRows(data);
-  } catch (error) {
-    console.error('Error fetching data:', error.response ? error.response.data : error.message);
-  }
-};
+import Modal from './Modal';
+import LocationModal from './LocationModal'; 
 
 const Table = () => {
   const [rows, setRows] = useState([]);
   const [originalRows, setOriginalRows] = useState([]);
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
   const [filters, setFilters] = useState({ type: '', make: '', model: '', year: '', transmission: '', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
   const [filterOptions, setFilterOptions] = useState({ types: [], makes: [], models: [], years: [], transmissions: [] });
+
+  const columns = [
+    { field: 'class', headerName: 'Tipo de Auto', width: 150 },
+    { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150 },
+    { field: 'make', headerName: 'Marca', width: 130 },
+    { field: 'model', headerName: 'Modelo', width: 130 },
+    { field: 'year', headerName: 'Año', width: 90, type: 'number' },
+    { field: 'transmission', headerName: 'Tipo de Transmisión', width: 180 },
+    { field: 'city_mpg', headerName: 'Consumo en Ciudad (mpg)', width: 180, type: 'number' },
+    { field: 'highway_mpg', headerName: 'Consumo en Carretera (mpg)', width: 180, type: 'number' },
+    { field: 'combination_mpg', headerName: 'Consumo Mixto (mpg)', width: 180, type: 'number' },
+    {
+      field: 'location',
+      headerName: 'Ubicación',
+      width: 120,
+      renderCell: (params) => (
+        <IconButton
+          color="primary"
+          onClick={() => handleOpenLocationModal(params.row)}
+        >
+          <LocationOnIcon />
+        </IconButton>
+      ),
+    },
+  ];
+
+  const fetchCarData = async (setRows, setOriginalRows, setFilterOptions) => {
+    const apiUrl = `https://api.api-ninjas.com/v1/cars`;
+    const apiKey = import.meta.env.VITE_API_KEY;
+    
+    try {
+      const response = await axios.get(apiUrl, {
+        headers: {
+          'X-Api-Key': apiKey,
+        },
+        params: {
+          limit: 50,
+          fuel_type: 'gas',
+        },
+      });
+      const data = response.data.map((item, index) => ({
+        ...item,
+        id: index,
+        lat: Math.random() * (50 - (-50)) + (-50), 
+        lng: Math.random() * (50 - (-50)) + (-50), 
+      }));
+
+      const types = [...new Set(data.map(item => item.class))];
+      const makes = [...new Set(data.map(item => item.make))];
+      const models = [...new Set(data.map(item => item.model))];
+      const years = [...new Set(data.map(item => item.year))];
+      const transmissions = [...new Set(data.map(item => item.transmission))];
+
+      setFilterOptions({ types, makes, models, years, transmissions });
+      setRows(data);
+      setOriginalRows(data);
+    } catch (error) {
+      console.error('Error fetching data:', error.response ? error.response.data : error.message);
+    }
+  };
 
   useEffect(() => {
     fetchCarData(setRows, setOriginalRows, setFilterOptions);
@@ -66,6 +88,15 @@ const Table = () => {
 
   const handleCloseModal = () => {
     setModalOpen(false);
+  };
+
+  const handleOpenLocationModal = (row) => {
+    setSelectedLocation({ lat: row.lat, lng: row.lng });
+    setLocationModalOpen(true);
+  };
+
+  const handleCloseLocationModal = () => {
+    setLocationModalOpen(false);
   };
 
   const applyFilters = () => {
@@ -117,6 +148,12 @@ const Table = () => {
         setFilters={setFilters}
         applyFilters={applyFilters}
         resetFilters={resetFilters}
+      />
+      <LocationModal
+        open={locationModalOpen}
+        handleClose={handleCloseLocationModal}
+        lat={selectedLocation.lat}
+        lng={selectedLocation.lng}
       />
     </div>
   );
