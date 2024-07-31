@@ -8,6 +8,16 @@ import { Box, Paper, Typography } from '@mui/material';
 import Modal from './Modal';
 import LocationModal from './LocationModal'; 
 
+const mpgToKml = (mpg) => (mpg * 0.425144).toFixed(2);
+
+const typeTranslations = {
+  'two seater': 'Biplaza',
+  'subcompact car': 'Subcompacto',
+  'van': 'Furgoneta',
+  'compact car': 'Compacto',
+  'midsize car': 'Mediano',
+};
+
 const Table = () => {
   const [originalRows, setOriginalRows] = useState([]);
   const [rows, setRows] = useState([]);
@@ -21,7 +31,14 @@ const Table = () => {
   const [sortModel, setSortModel] = useState([]);
 
   const columns = [
-    { field: 'class', headerName: 'Tipo de Auto', width: 150 },
+    {
+      field: 'class',
+      headerName: 'Tipo de Auto',
+      width: 150,
+      renderCell: (params) => (
+        <span>{typeTranslations[params.value] || params.value}</span>
+      ),
+    },
     { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150 },
     {
       field: 'make',
@@ -54,7 +71,7 @@ const Table = () => {
       width: 180,
       type: 'number',
       renderCell: (params) => (
-        <span>{params.value} mpg</span>
+        <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
     },
     {
@@ -63,7 +80,7 @@ const Table = () => {
       width: 180,
       type: 'number',
       renderCell: (params) => (
-        <span>{params.value} mpg</span>
+        <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
     },
     {
@@ -72,7 +89,7 @@ const Table = () => {
       width: 180,
       type: 'number',
       renderCell: (params) => (
-        <span>{params.value} mpg</span>
+        <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
     },
   ];
@@ -226,6 +243,9 @@ const Table = () => {
               '& .Mui-selected': {
                 backgroundColor: 'rgba(0, 0, 0, 0.08) !important',
               },
+              "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+                outline: "none !important",
+             },
             }}
             isRowSelectable={(params) => selectedRow === params.id}
           />
