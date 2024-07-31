@@ -1,5 +1,6 @@
 import { ThemeContextProvider } from "./context/ThemeContext";
 import Table from "./components/Table";
+import ToggleColorMode from "./components/ToggleColorMode";
 
 function App() {
 
@@ -7,6 +8,7 @@ function App() {
     <ThemeContextProvider>
       <>
         <div style={{ textAlign: 'center' }}>
+          <ToggleColorMode/>
           <h1>Tech Interview DrivIn</h1>
         </div>
         <Table/>

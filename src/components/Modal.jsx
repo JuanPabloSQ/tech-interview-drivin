@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Modal as MUIModal, Typography, Button, TextField, MenuItem, Slider } from '@mui/material';
 
 const style = {

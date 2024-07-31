@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Modal as MUIModal, Typography, Button } from '@mui/material';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
