@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import TablePagination from '@mui/material/TablePagination';
 import { Box, Paper, Typography } from '@mui/material';
 import Modal from './Modal';
 import LocationModal from './LocationModal'; 
 
 const Table = () => {
-  const [rows, setRows] = useState([]);
   const [originalRows, setOriginalRows] = useState([]);
+  const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
@@ -76,7 +77,7 @@ const Table = () => {
     },
   ];
 
-  const fetchCarData = async (setRows, setOriginalRows, setFilterOptions) => {
+  const fetchCarData = async () => {
     const apiUrl = `https://api.api-ninjas.com/v1/cars`;
     const apiKey = import.meta.env.VITE_API_KEY;
     
@@ -104,7 +105,6 @@ const Table = () => {
       const transmissions = [...new Set(data.map(item => item.transmission))];
 
       setFilterOptions({ types, makes, models, years, transmissions });
-      setRows(data);
       setOriginalRows(data);
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
@@ -112,7 +112,7 @@ const Table = () => {
   };
 
   useEffect(() => {
-    fetchCarData(setRows, setOriginalRows, setFilterOptions);
+    fetchCarData();
   }, []);
 
   const handleOpenModal = () => {
@@ -130,6 +130,10 @@ const Table = () => {
 
   const handleCloseLocationModal = () => {
     setLocationModalOpen(false);
+  };
+  
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
   const applyFilters = () => {
@@ -163,24 +167,30 @@ const Table = () => {
 
   const handleSortModelChange = (newSortModel) => {
     setSortModel(newSortModel);
-    if (newSortModel.length === 0) {
-      setRows(originalRows);
-      return;
-    }
-
-    const { field, sort } = newSortModel[0];
-    const sortedRows = [...rows].sort((a, b) => {
-      if (a[field] < b[field]) {
-        return sort === 'asc' ? -1 : 1;
-      }
-      if (a[field] > b[field]) {
-        return sort === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-
-    setRows(sortedRows);
   };
+
+  const visibleRows = useMemo(
+    () => {
+      const { field, sort } = sortModel[0] ?? {};
+      return [...originalRows].sort((a, b) => {
+        if (a[field] < b[field]) {
+          return sort === 'asc' ? -1 : 1;
+        }
+        if (a[field] > b[field]) {
+          return sort === 'asc' ? 1 : -1;
+        }
+        return 0;
+      })
+      .slice(
+        page * 20,
+        (page * 20) + 20,
+      )
+    },
+    [originalRows, sortModel, page],
+  );
+
+  const totalPages = Math.ceil(originalRows.length / 20);
+  const validPage = Math.max(0, Math.min(page, totalPages - 1));
 
   return (
     <div style={{ width: '100%' }} onClick={handleOutsideClick}>
@@ -200,17 +210,10 @@ const Table = () => {
         <Paper onClick={(e) => e.stopPropagation()}>
           <DataGrid
             autoHeight
-            rows={rows}
+            rows={visibleRows}
             columns={columns}
             getRowId={(row) => row.id}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 20 },
-              },
-            }}
-            pageSizeOptions={[20]}
-            page={page}
-            onPageChange={(newPage) => setPage(newPage)}
+            hideFooter
             onRowClick={handleRowClick}
             disableColumnFilter
             sortingMode="server"
@@ -225,6 +228,17 @@ const Table = () => {
               },
             }}
             isRowSelectable={(params) => selectedRow === params.id}
+          />
+          <TablePagination
+            component='div'
+            count={originalRows.length}
+            rowsPerPage={20}
+            page={validPage}
+            onPageChange={handleChangePage}
+            rowsPerPageOptions={[]} 
+            showFirstButton={false} 
+            showLastButton={false} 
+            labelRowsPerPage='' 
           />
         </Paper>
       </Box>
