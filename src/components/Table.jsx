@@ -16,6 +16,16 @@ const typeTranslations = {
   'van': 'Furgoneta',
   'compact car': 'Compacto',
   'midsize car': 'Mediano',
+  'large car': 'Grande',
+  'standard pickup truck': 'Camioneta estándar',
+  'special purpose vehicle': 'Vehículo de propósito especial',
+  'midsize station wagon': 'Station wagon mediano',
+  'sport utility vehicle': 'Vehículo utilitario deportivo',
+  'minivan': 'Minivan',
+  'small pickup truck': 'Camioneta pequeña',
+  'minicompact car': 'Minicompacto',
+  'small station wagon': 'Station wagon pequeño',
+  'small sport utility vehicle': 'Vehículo utilitario deportivo pequeño',
 };
 
 const Table = () => {
@@ -25,10 +35,11 @@ const Table = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
-  const [filters, setFilters] = useState({ type: '', make: '', model: '', year: '', transmission: '', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
+  const [filters, setFilters] = useState({ type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
   const [filterOptions, setFilterOptions] = useState({ types: [], makes: [], models: [], years: [], transmissions: [] });
   const [selectedRow, setSelectedRow] = useState(null);
   const [sortModel, setSortModel] = useState([]);
+  const [tempFilters, setTempFilters] = useState(filters);
 
   const columns = [
     {
@@ -38,8 +49,9 @@ const Table = () => {
       renderCell: (params) => (
         <span>{typeTranslations[params.value] || params.value}</span>
       ),
+      disableColumnMenu: true,
     },
-    { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150 },
+    { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150, disableColumnMenu: true },
     {
       field: 'make',
       headerName: 'Marca',
@@ -47,6 +59,7 @@ const Table = () => {
       renderCell: (params) => (
         <span>{params.value.charAt(0).toUpperCase() + params.value.slice(1)}</span>
       ),
+      disableColumnMenu: true,
     },
     {
       field: 'model',
@@ -55,8 +68,9 @@ const Table = () => {
       renderCell: (params) => (
         <span>{params.value.charAt(0).toUpperCase() + params.value.slice(1)}</span>
       ),
+      disableColumnMenu: true,
     },
-    { field: 'year', headerName: 'Año', width: 90, type: 'number' },
+    { field: 'year', headerName: 'Año', width: 90, type: 'number', disableColumnMenu: true },
     {
       field: 'transmission',
       headerName: 'Transmisión',
@@ -64,6 +78,7 @@ const Table = () => {
       renderCell: (params) => {
         return params.value === 'm' ? 'Mecánico' : params.value === 'a' ? 'Automático' : params.value;
       },
+      disableColumnMenu: true,
     },
     {
       field: 'city_mpg',
@@ -73,6 +88,7 @@ const Table = () => {
       renderCell: (params) => (
         <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
+      disableColumnMenu: true,
     },
     {
       field: 'highway_mpg',
@@ -82,6 +98,7 @@ const Table = () => {
       renderCell: (params) => (
         <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
+      disableColumnMenu: true,
     },
     {
       field: 'combination_mpg',
@@ -91,10 +108,11 @@ const Table = () => {
       renderCell: (params) => (
         <span>{params.value} mpg ({mpgToKml(params.value)} km/l)</span>
       ),
+      disableColumnMenu: true,
     },
   ];
 
-  const fetchCarData = async () => {
+  const fetchCarData = async (filtersToApply) => {
     const apiUrl = `https://api.api-ninjas.com/v1/cars`;
     const apiKey = import.meta.env.VITE_API_KEY;
     
@@ -105,7 +123,7 @@ const Table = () => {
         },
         params: {
           limit: 50,
-          fuel_type: 'gas',
+          fuel_type: filtersToApply.fuel_type,
         },
       });
       const data = response.data.map((item, index) => ({
@@ -123,16 +141,18 @@ const Table = () => {
 
       setFilterOptions({ types, makes, models, years, transmissions });
       setOriginalRows(data);
+      setRows(data);
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
     }
   };
 
   useEffect(() => {
-    fetchCarData();
+    fetchCarData(filters);
   }, []);
 
   const handleOpenModal = () => {
+    setTempFilters(filters);
     setModalOpen(true);
   };
 
@@ -154,23 +174,13 @@ const Table = () => {
   };
 
   const applyFilters = () => {
-    const filteredRows = originalRows.filter(row =>
-      (!filters.type || row.class === filters.type) &&
-      (!filters.make || row.make === filters.make) &&
-      (!filters.model || row.model === filters.model) &&
-      (!filters.year || row.year === filters.year) &&
-      (!filters.transmission || row.transmission === filters.transmission) &&
-      (row.city_mpg >= filters.city_mpg[0] && row.city_mpg <= filters.city_mpg[1]) &&
-      (row.highway_mpg >= filters.highway_mpg[0] && row.highway_mpg <= filters.highway_mpg[1]) &&
-      (row.combination_mpg >= filters.combination_mpg[0] && row.combination_mpg <= filters.combination_mpg[1])
-    );
-    setRows(filteredRows);
+    setFilters(tempFilters);
+    fetchCarData(tempFilters);
     handleCloseModal();
   };
 
   const resetFilters = () => {
-    setFilters({ type: '', make: '', model: '', year: '', transmission: '', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
-    setRows(originalRows);
+    setTempFilters({ type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
   };
 
   const handleRowClick = (params) => {
@@ -189,7 +199,7 @@ const Table = () => {
   const visibleRows = useMemo(
     () => {
       const { field, sort } = sortModel[0] ?? {};
-      return [...originalRows].sort((a, b) => {
+      return [...rows].sort((a, b) => {
         if (a[field] < b[field]) {
           return sort === 'asc' ? -1 : 1;
         }
@@ -203,10 +213,10 @@ const Table = () => {
         (page * 20) + 20,
       )
     },
-    [originalRows, sortModel, page],
+    [rows, sortModel, page],
   );
 
-  const totalPages = Math.ceil(originalRows.length / 20);
+  const totalPages = Math.ceil(rows.length / 20);
   const validPage = Math.max(0, Math.min(page, totalPages - 1));
 
   return (
@@ -251,7 +261,7 @@ const Table = () => {
           />
           <TablePagination
             component='div'
-            count={originalRows.length}
+            count={rows.length}
             rowsPerPage={20}
             page={validPage}
             onPageChange={handleChangePage}
@@ -266,8 +276,8 @@ const Table = () => {
         open={modalOpen}
         handleClose={handleCloseModal}
         filterOptions={filterOptions}
-        filters={filters}
-        setFilters={setFilters}
+        filters={tempFilters}
+        setFilters={setTempFilters}
         applyFilters={applyFilters}
         resetFilters={resetFilters}
       />

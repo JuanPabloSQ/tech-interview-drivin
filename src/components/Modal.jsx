@@ -39,9 +39,11 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.types.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </MenuItem>
+              option && (
+                <MenuItem key={option} value={option}>
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </MenuItem>
+              )
             ))}
           </TextField>
           <TextField
@@ -54,9 +56,11 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.makes.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </MenuItem>
+              option && (
+                <MenuItem key={option} value={option}>
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </MenuItem>
+              )
             ))}
           </TextField>
           <TextField
@@ -69,9 +73,11 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.models.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option.charAt(0).toUpperCase() + option.slice(1)}
-              </MenuItem>
+              option && (
+                <MenuItem key={option} value={option}>
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </MenuItem>
+              )
             ))}
           </TextField>
           <TextField
@@ -99,10 +105,24 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.transmissions.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option === 'm' ? 'Mecánico' : option === 'a' ? 'Automático' : option.charAt(0).toUpperCase() + option.slice(1)}
-              </MenuItem>
+              option && (
+                <MenuItem key={option} value={option}>
+                  {option === 'm' ? 'Mecánico' : option === 'a' ? 'Automático' : option.charAt(0).toUpperCase() + option.slice(1)}
+                </MenuItem>
+              )
             ))}
+          </TextField>
+          <TextField
+            select
+            label="Tipo de Combustible"
+            value={filters.fuel_type}
+            onChange={(e) => setFilters((prev) => ({ ...prev, fuel_type: e.target.value }))}
+            fullWidth
+            margin="dense"
+          >
+            <MenuItem value="gas">Gasolina</MenuItem>
+            <MenuItem value="diesel">Diesel</MenuItem>
+            <MenuItem value="electricity">Electricidad</MenuItem>
           </TextField>
           <Typography id="city-mpg-slider" gutterBottom>
             Consumo en Ciudad (mpg)
