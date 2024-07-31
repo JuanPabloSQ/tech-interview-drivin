@@ -6,7 +6,7 @@ function App() {
   return (
     <ThemeContextProvider>
       <>
-        <h1> test </h1>
+        <h1> Tech Interview DrivIn</h1>
         <Table/>
       </>
     </ThemeContextProvider>
