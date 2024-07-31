@@ -22,6 +22,24 @@ const style = {
 };
 
 const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFilters, resetFilters }) => {
+  const typeTranslations = {
+    'two seater': 'Biplaza',
+    'subcompact car': 'Subcompacto',
+    'van': 'Furgoneta',
+    'compact car': 'Compacto',
+    'midsize car': 'Mediano',
+    'large car': 'Grande',
+    'standard pickup truck': 'Camioneta estándar',
+    'special purpose vehicle': 'Vehículo de propósito especial',
+    'midsize station wagon': 'Station wagon mediano',
+    'sport utility vehicle': 'Vehículo utilitario deportivo',
+    'minivan': 'Minivan',
+    'small pickup truck': 'Camioneta pequeña',
+    'minicompact car': 'Minicompacto',
+    'small station wagon': 'Station wagon pequeño',
+    'small sport utility vehicle': 'Vehículo utilitario deportivo pequeño',
+  };
+
   return (
     <MUIModal open={open} onClose={handleClose}>
       <Box sx={style}>
@@ -41,7 +59,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             {filterOptions.types.map((option) => (
               option && (
                 <MenuItem key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                  {typeTranslations[option] || option.charAt(0).toUpperCase() + option.slice(1)}
                 </MenuItem>
               )
             ))}
@@ -50,7 +68,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             select
             label="Marca"
             value={filters.make}
-            onChange={(e) => setFilters((prev) => ({ ...prev, make: e.target.value }))}
+            onChange={(e) => setFilters((prev) => ({ ...prev, make: e.target.value, model: '' }))}
             fullWidth
             margin="dense"
           >
@@ -104,25 +122,8 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
-            {filterOptions.transmissions.map((option) => (
-              option && (
-                <MenuItem key={option} value={option}>
-                  {option === 'm' ? 'Mecánico' : option === 'a' ? 'Automático' : option.charAt(0).toUpperCase() + option.slice(1)}
-                </MenuItem>
-              )
-            ))}
-          </TextField>
-          <TextField
-            select
-            label="Tipo de Combustible"
-            value={filters.fuel_type}
-            onChange={(e) => setFilters((prev) => ({ ...prev, fuel_type: e.target.value }))}
-            fullWidth
-            margin="dense"
-          >
-            <MenuItem value="gas">Gasolina</MenuItem>
-            <MenuItem value="diesel">Diesel</MenuItem>
-            <MenuItem value="electricity">Electricidad</MenuItem>
+            <MenuItem value="m">Mecánico</MenuItem>
+            <MenuItem value="a">Automático</MenuItem>
           </TextField>
           <Typography id="city-mpg-slider" gutterBottom>
             Consumo en Ciudad (mpg)
