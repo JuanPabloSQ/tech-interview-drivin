@@ -6,7 +6,9 @@ function App() {
   return (
     <ThemeContextProvider>
       <>
-        <h1> Tech Interview DrivIn</h1>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Tech Interview DrivIn</h1>
+        </div>
         <Table/>
       </>
     </ThemeContextProvider>

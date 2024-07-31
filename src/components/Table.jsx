@@ -3,8 +3,7 @@ import axios from 'axios';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Box } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import Modal from './Modal';
 import LocationModal from './LocationModal'; 
 
@@ -17,28 +16,62 @@ const Table = () => {
   const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
   const [filters, setFilters] = useState({ type: '', make: '', model: '', year: '', transmission: '', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
   const [filterOptions, setFilterOptions] = useState({ types: [], makes: [], models: [], years: [], transmissions: [] });
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [sortModel, setSortModel] = useState([]);
 
   const columns = [
     { field: 'class', headerName: 'Tipo de Auto', width: 150 },
     { field: 'fuel_type', headerName: 'Tipo de Combustible', width: 150 },
-    { field: 'make', headerName: 'Marca', width: 130 },
-    { field: 'model', headerName: 'Modelo', width: 130 },
-    { field: 'year', headerName: 'Año', width: 90, type: 'number' },
-    { field: 'transmission', headerName: 'Tipo de Transmisión', width: 180 },
-    { field: 'city_mpg', headerName: 'Consumo en Ciudad (mpg)', width: 180, type: 'number' },
-    { field: 'highway_mpg', headerName: 'Consumo en Carretera (mpg)', width: 180, type: 'number' },
-    { field: 'combination_mpg', headerName: 'Consumo Mixto (mpg)', width: 180, type: 'number' },
     {
-      field: 'location',
-      headerName: 'Ubicación',
-      width: 120,
+      field: 'make',
+      headerName: 'Marca',
+      width: 130,
       renderCell: (params) => (
-        <IconButton
-          color="primary"
-          onClick={() => handleOpenLocationModal(params.row)}
-        >
-          <LocationOnIcon />
-        </IconButton>
+        <span>{params.value.charAt(0).toUpperCase() + params.value.slice(1)}</span>
+      ),
+    },
+    {
+      field: 'model',
+      headerName: 'Modelo',
+      width: 130,
+      renderCell: (params) => (
+        <span>{params.value.charAt(0).toUpperCase() + params.value.slice(1)}</span>
+      ),
+    },
+    { field: 'year', headerName: 'Año', width: 90, type: 'number' },
+    {
+      field: 'transmission',
+      headerName: 'Transmisión',
+      width: 180,
+      renderCell: (params) => {
+        return params.value === 'm' ? 'Mecánico' : params.value === 'a' ? 'Automático' : params.value;
+      },
+    },
+    {
+      field: 'city_mpg',
+      headerName: 'Consumo en Ciudad',
+      width: 180,
+      type: 'number',
+      renderCell: (params) => (
+        <span>{params.value} mpg</span>
+      ),
+    },
+    {
+      field: 'highway_mpg',
+      headerName: 'Consumo en Carretera',
+      width: 180,
+      type: 'number',
+      renderCell: (params) => (
+        <span>{params.value} mpg</span>
+      ),
+    },
+    {
+      field: 'combination_mpg',
+      headerName: 'Consumo Mixto',
+      width: 180,
+      type: 'number',
+      renderCell: (params) => (
+        <span>{params.value} mpg</span>
       ),
     },
   ];
@@ -119,27 +152,82 @@ const Table = () => {
     setRows(originalRows);
   };
 
+  const handleRowClick = (params) => {
+    setSelectedRow(params.row.id);
+    handleOpenLocationModal(params.row);
+  };
+
+  const handleOutsideClick = () => {
+    setSelectedRow(null);
+  };
+
+  const handleSortModelChange = (newSortModel) => {
+    setSortModel(newSortModel);
+    if (newSortModel.length === 0) {
+      setRows(originalRows);
+      return;
+    }
+
+    const { field, sort } = newSortModel[0];
+    const sortedRows = [...rows].sort((a, b) => {
+      if (a[field] < b[field]) {
+        return sort === 'asc' ? -1 : 1;
+      }
+      if (a[field] > b[field]) {
+        return sort === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    setRows(sortedRows);
+  };
+
   return (
-    <div style={{ width: '100%' }}>
-      <Box display="flex" justifyContent="flex-end" mb={2}>
-        <IconButton aria-label="filter" onClick={handleOpenModal}>
-          <FilterListIcon />
+    <div style={{ width: '100%' }} onClick={handleOutsideClick}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} mx={2}>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Tabla de autos
+        </Typography>
+        <IconButton 
+          aria-label="filter" 
+          onClick={handleOpenModal}
+          sx={{ fontSize: 32, marginRight: 2 }}
+        >
+          <FilterListIcon fontSize="inherit" />
         </IconButton>
       </Box>
-      <DataGrid
-        autoHeight
-        rows={rows}
-        columns={columns}
-        getRowId={(row) => row.id}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 20 },
-          },
-        }}
-        pageSizeOptions={[20]}
-        page={page}
-        onPageChange={(newPage) => setPage(newPage)}
-      />
+      <Box sx={{ height: 400, width: 'calc(100% - 32px)', margin: '0 16px 16px 16px' }}>
+        <Paper onClick={(e) => e.stopPropagation()}>
+          <DataGrid
+            autoHeight
+            rows={rows}
+            columns={columns}
+            getRowId={(row) => row.id}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 20 },
+              },
+            }}
+            pageSizeOptions={[20]}
+            page={page}
+            onPageChange={(newPage) => setPage(newPage)}
+            onRowClick={handleRowClick}
+            disableColumnFilter
+            sortingMode="server"
+            sortModel={sortModel}
+            onSortModelChange={handleSortModelChange}
+            sx={{
+              '& .MuiDataGrid-row:hover': {
+                cursor: 'pointer',
+              },
+              '& .Mui-selected': {
+                backgroundColor: 'rgba(0, 0, 0, 0.08) !important',
+              },
+            }}
+            isRowSelectable={(params) => selectedRow === params.id}
+          />
+        </Paper>
+      </Box>
       <Modal
         open={modalOpen}
         handleClose={handleCloseModal}

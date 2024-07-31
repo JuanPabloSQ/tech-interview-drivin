@@ -16,24 +16,27 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 800,
-  height: 600,
+  width: '90%',
+  height: '80vh',
+  maxWidth: 800,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 4,
+  p: 2,
   display: 'flex',
   flexDirection: 'column',
+  '@media (min-width: 600px)': {
+    width: '80%',
+  },
+  '@media (min-width: 960px)': {
+    width: 800,
+    height: 600,
+  },
 };
-
-
 
 const LocationModal = ({ open, handleClose, lat, lng }) => {
   return (
-    <MUIModal
-      open={open}
-      onClose={handleClose}
-    >
+    <MUIModal open={open} onClose={handleClose}>
       <Box sx={style}>
         <Typography variant="h6" component="h2">
           Ubicación del Auto
@@ -41,7 +44,7 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
         <MapContainer
           center={[lat, lng]}
           zoom={13}
-          style={{flexGrow: 1,borderRadius: '4px'}}
+          style={{ flexGrow: 1, borderRadius: '4px' }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -60,3 +63,4 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
 };
 
 export default LocationModal;
+

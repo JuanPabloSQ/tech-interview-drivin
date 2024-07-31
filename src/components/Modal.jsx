@@ -6,19 +6,25 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: '90%',
+  maxWidth: 400,
+  maxHeight: '90vh',
+  overflowY: 'auto',
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 4,
+  p: 3,
+  '@media (min-width: 600px)': {
+    width: '80%',
+  },
+  '@media (min-width: 960px)': {
+    width: 400,
+  },
 };
 
 const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFilters, resetFilters }) => {
   return (
-    <MUIModal
-      open={open}
-      onClose={handleClose}
-    >
+    <MUIModal open={open} onClose={handleClose}>
       <Box sx={style}>
         <Typography variant="h6" component="h2">
           Filtrar Resultados
@@ -30,12 +36,12 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             value={filters.type}
             onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
             fullWidth
-            margin="normal"
+            margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.types.map((option) => (
               <MenuItem key={option} value={option}>
-                {option}
+                {option.charAt(0).toUpperCase() + option.slice(1)}
               </MenuItem>
             ))}
           </TextField>
@@ -45,12 +51,12 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             value={filters.make}
             onChange={(e) => setFilters((prev) => ({ ...prev, make: e.target.value }))}
             fullWidth
-            margin="normal"
+            margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.makes.map((option) => (
               <MenuItem key={option} value={option}>
-                {option}
+                {option.charAt(0).toUpperCase() + option.slice(1)}
               </MenuItem>
             ))}
           </TextField>
@@ -60,12 +66,12 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             value={filters.model}
             onChange={(e) => setFilters((prev) => ({ ...prev, model: e.target.value }))}
             fullWidth
-            margin="normal"
+            margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.models.map((option) => (
               <MenuItem key={option} value={option}>
-                {option}
+                {option.charAt(0).toUpperCase() + option.slice(1)}
               </MenuItem>
             ))}
           </TextField>
@@ -75,7 +81,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             value={filters.year}
             onChange={(e) => setFilters((prev) => ({ ...prev, year: e.target.value }))}
             fullWidth
-            margin="normal"
+            margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.years.map((option) => (
@@ -90,12 +96,12 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             value={filters.transmission}
             onChange={(e) => setFilters((prev) => ({ ...prev, transmission: e.target.value }))}
             fullWidth
-            margin="normal"
+            margin="dense"
           >
             <MenuItem value="">Ninguna</MenuItem>
             {filterOptions.transmissions.map((option) => (
               <MenuItem key={option} value={option}>
-                {option}
+                {option === 'm' ? 'Mecánico' : option === 'a' ? 'Automático' : option.charAt(0).toUpperCase() + option.slice(1)}
               </MenuItem>
             ))}
           </TextField>
@@ -144,16 +150,18 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
               { value: 50, label: '50' },
             ]}
           />
-          <Box display="flex" justifyContent="flex-end" mt={2}>
+          <Box display="flex" justifyContent="space-between" mt={2}>
             <Button onClick={resetFilters} sx={{ mr: 1 }}>
               Reiniciar
             </Button>
-            <Button onClick={handleClose} sx={{ mr: 1 }}>
-              Cancelar
-            </Button>
-            <Button variant="contained" onClick={applyFilters}>
-              Aplicar 
-            </Button>
+            <Box>
+              <Button onClick={handleClose} sx={{ mr: 1 }}>
+                Cancelar
+              </Button>
+              <Button variant="contained" onClick={applyFilters}>
+                Aplicar 
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Box>
