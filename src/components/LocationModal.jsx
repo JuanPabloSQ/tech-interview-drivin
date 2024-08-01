@@ -17,21 +17,17 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: '90%',
-  height: '70vh',
-  maxWidth: 800,
+  width: '100%',
+  maxHeight: '90vh',
+  overflowY: 'auto',
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 2,
-  display: 'flex',
-  flexDirection: 'column',
-  '@media (min-width: 600px)': {
+  '@media (min-width: 801px)': {
     width: '80%',
   },
-  '@media (min-width: 960px)': {
-    width: 800,
-    height: 560,
+  '@media (min-width: 1281px)': {
+    maxWidth: 600,
   },
 };
 
@@ -63,12 +59,12 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
   return (
     <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
-        <Card sx={{ width: '100%', height: '100%' }}>
+        <Card sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <CardMedia>
             <MapContainer
               center={[lat, lng]}
               zoom={13}
-              style={{ height: 300, borderRadius: '4px' }}
+              style={{ height: '40vh', borderRadius: '4px' }}
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -77,7 +73,7 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
               <Marker position={[lat, lng]} />
             </MapContainer>
           </CardMedia>
-          <CardContent>
+          <CardContent sx={{ flexGrow: 1 }}>
             <Typography variant="h6" component="h2" gutterBottom>
               Ubicación del Auto
             </Typography>
@@ -85,13 +81,14 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
               <strong>Dirección:</strong> {address}
             </Typography>
             <Typography variant="body1" color="textSecondary" gutterBottom>
-              <strong>Latitud:</strong> {lat}
+              <strong>Latitud:</strong> {lat.toFixed(7)}
             </Typography>
             <Typography variant="body1" color="textSecondary" gutterBottom>
-              <strong>Longitud:</strong> {lng}
+              <strong>Longitud:</strong> {lng.toFixed(7)}
             </Typography>
           </CardContent>
-          <CardActions sx={{ justifyContent: 'center' }}>
+          <CardActions sx={{ justifyContent: 'center', paddingBottom: 5
+           }}>
             <Button variant="contained" onClick={handleClose}>
               Volver
             </Button>
@@ -103,4 +100,3 @@ const LocationModal = ({ open, handleClose, lat, lng }) => {
 };
 
 export default LocationModal;
-
