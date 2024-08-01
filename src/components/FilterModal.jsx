@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Box, Modal, Typography, Button, TextField, Slider, MenuItem, Grid, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Box, Modal, Typography, Button, TextField, Slider, MenuItem, Grid } from '@mui/material';
 
 const style = {
   position: 'absolute',
@@ -49,8 +48,7 @@ const FilterModal = ({ open, handleClose, filters, setFilters, applyFilters, res
   const [inputMake, setInputMake] = useState(filters.make);
   const [inputModel, setInputModel] = useState(filters.model);
   const [inputYear, setInputYear] = useState(filters.year);
-  const theme = useTheme();
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
+
 
   const handleTypeChange = (e) => {
     const inputValue = e.target.value;

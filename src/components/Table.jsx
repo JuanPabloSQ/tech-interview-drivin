@@ -46,6 +46,11 @@ const inicialFilters = {
   combination_mpg: [0, 50]
 };
 
+const rowsPerPage = 20;
+
+const apiUrl = import.meta.env.VITE_CARS_API_URL;
+const apiKey = import.meta.env.VITE_CARS_API_KEY;
+
 const Table = () => {
   const [originalRows, setOriginalRows] = useState([]);
   const [page, setPage] = useState(0);
@@ -53,7 +58,6 @@ const Table = () => {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
   const [filters, setFilters] = useState(inicialFilters);
-  const [filterOptions, setFilterOptions] = useState({ types: [], makes: [], models: [], years: [], transmissions: [] });
   const [selectedRow, setSelectedRow] = useState(null);
   const [sortModel, setSortModel] = useState([]);
   const [tempFilters, setTempFilters] = useState(filters);
@@ -140,8 +144,6 @@ const Table = () => {
 
   const fetchCarData = async () => {
     setLoading(true);
-    const apiUrl = `https://api.api-ninjas.com/v1/cars`;
-    const apiKey = import.meta.env.VITE_API_KEY;
     
     try {
       const response = await axios.get(apiUrl, {
@@ -169,13 +171,6 @@ const Table = () => {
         lng: Math.random() * (50 - (-50)) + (-50), 
       }));
 
-      const types = [...new Set(data.map(item => item.class))];
-      const makes = [...new Set(data.map(item => item.make))];
-      const models = [...new Set(data.map(item => item.model))];
-      const years = [...new Set(data.map(item => item.year))];
-      const transmissions = [...new Set(data.map(item => item.transmission))];
-
-      setFilterOptions({ types, makes, models, years, transmissions });
       setOriginalRows(data);
       setLoading(false);
     } catch (error) {
@@ -252,14 +247,14 @@ const Table = () => {
         return 0;
       })
       .slice(
-        page * 20,
-        (page * 20) + 20,
+        page * rowsPerPage,
+        (page * rowsPerPage) + rowsPerPage,
       )
     },
     [originalRows, sortModel, page],
   );
 
-  const totalPages = Math.ceil(originalRows.length / 20);
+  const totalPages = Math.ceil(originalRows.length / rowsPerPage);
   const validPage = Math.max(0, Math.min(page, totalPages - 1));
 
   return (
@@ -313,7 +308,7 @@ const Table = () => {
               <TablePagination
                 component='div'
                 count={originalRows.length}
-                rowsPerPage={20}
+                rowsPerPage={rowsPerPage}
                 page={validPage}
                 onPageChange={handleChangePage}
                 rowsPerPageOptions={[]} 
@@ -328,7 +323,6 @@ const Table = () => {
       <FilterModal
         open={modalOpen}
         handleClose={handleCloseModal}
-        filterOptions={filterOptions}
         filters={tempFilters}
         setFilters={setTempFilters}
         applyFilters={applyFilters}

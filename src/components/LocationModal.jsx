@@ -31,13 +31,15 @@ const style = {
   },
 };
 
+const mapApiUrl = import.meta.env.VITE_OPEN_STREET_MAPS_API_URL;
+
 const LocationModal = ({ open, handleClose, lat, lng }) => {
   const [address, setAddress] = useState('');
 
   useEffect(() => {
     const fetchAddress = async () => {
       try {
-        const response = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+        const response = await axios.get(mapApiUrl, {
           params: {
             lat,
             lon: lng,
