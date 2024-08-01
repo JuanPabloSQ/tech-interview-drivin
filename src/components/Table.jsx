@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TablePagination from '@mui/material/TablePagination';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography, LinearProgress } from '@mui/material';
 import Modal from './Modal';
 import LocationModal from './LocationModal';
 
@@ -57,6 +57,7 @@ const Table = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [sortModel, setSortModel] = useState([]);
   const [tempFilters, setTempFilters] = useState(filters);
+  const [loading, setLoading] = useState(false);
 
   const columns = [
     {
@@ -138,6 +139,7 @@ const Table = () => {
   ];
 
   const fetchCarData = async () => {
+    setLoading(true);
     const apiUrl = `https://api.api-ninjas.com/v1/cars`;
     const apiKey = import.meta.env.VITE_API_KEY;
     
@@ -175,8 +177,10 @@ const Table = () => {
 
       setFilterOptions({ types, makes, models, years, transmissions });
       setOriginalRows(data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
+      setLoading(false);
     }
   };
 
@@ -276,41 +280,49 @@ const Table = () => {
       </Box>
       <Box sx={{ height: 400, width: 'calc(100% - 32px)', margin: '0 16px 16px 16px' }}>
         <Paper onClick={(e) => e.stopPropagation()}>
-          <DataGrid
-            autoHeight
-            rows={visibleRows}
-            columns={columns}
-            getRowId={(row) => row.id}
-            hideFooter
-            onRowClick={handleRowClick}
-            disableColumnFilter
-            sortingMode="server"
-            sortModel={sortModel}
-            onSortModelChange={handleSortModelChange}
-            sx={{
-              '& .MuiDataGrid-row:hover': {
-                cursor: 'pointer',
-              },
-              '& .Mui-selected': {
-                backgroundColor: 'rgba(0, 0, 0, 0.08) !important',
-              },
-              "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
-                outline: "none !important",
-             },
-            }}
-            isRowSelectable={(params) => selectedRow === params.id}
-          />
-          <TablePagination
-            component='div'
-            count={originalRows.length}
-            rowsPerPage={20}
-            page={validPage}
-            onPageChange={handleChangePage}
-            rowsPerPageOptions={[]} 
-            showFirstButton={false} 
-            showLastButton={false} 
-            labelRowsPerPage='' 
-          />
+          {loading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" height="4px">
+              <LinearProgress style={{ width: '100%' }} />
+            </Box>
+          ) : (
+            <>
+              <DataGrid
+                autoHeight
+                rows={visibleRows}
+                columns={columns}
+                getRowId={(row) => row.id}
+                hideFooter
+                onRowClick={handleRowClick}
+                disableColumnFilter
+                sortingMode="server"
+                sortModel={sortModel}
+                onSortModelChange={handleSortModelChange}
+                sx={{
+                  '& .MuiDataGrid-row:hover': {
+                    cursor: 'pointer',
+                  },
+                  '& .Mui-selected': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.08) !important',
+                  },
+                  "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
+                    outline: "none !important",
+                },
+                }}
+                isRowSelectable={(params) => selectedRow === params.id}
+              />
+              <TablePagination
+                component='div'
+                count={originalRows.length}
+                rowsPerPage={20}
+                page={validPage}
+                onPageChange={handleChangePage}
+                rowsPerPageOptions={[]} 
+                showFirstButton={false} 
+                showLastButton={false} 
+                labelRowsPerPage='' 
+              />
+            </>
+          )}
         </Paper>
       </Box>
       <Modal
