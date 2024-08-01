@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import axios from 'axios';
+import { useSnackbar } from '../context/SnackbarContext';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -35,26 +36,28 @@ const mapApiUrl = import.meta.env.VITE_OPEN_STREET_MAPS_API_URL;
 
 const LocationModal = ({ open, handleClose, lat, lng }) => {
   const [address, setAddress] = useState('');
+  const { errorSnackbar } = useSnackbar();
+
+  const fetchAddress = async () => {
+    try {
+      const response = await axios.get(mapApiUrl, {
+        params: {
+          lat,
+          lon: lng,
+          format: 'json'
+        }
+      });
+      const addressData = response.data;
+      const addressString = addressData.display_name;
+      setAddress(addressString);
+    } catch (error) {
+      errorSnackbar('Error con la conexion del mapa')
+      console.error('Error fetching address:', error);
+      setAddress('Dirección no disponible');
+    }
+  };
 
   useEffect(() => {
-    const fetchAddress = async () => {
-      try {
-        const response = await axios.get(mapApiUrl, {
-          params: {
-            lat,
-            lon: lng,
-            format: 'json'
-          }
-        });
-        const addressData = response.data;
-        const addressString = addressData.display_name;
-        setAddress(addressString);
-      } catch (error) {
-        console.error('Error fetching address:', error);
-        setAddress('Dirección no disponible');
-      }
-    };
-
     fetchAddress();
   }, [lat, lng]);
 

@@ -7,6 +7,7 @@ import TablePagination from '@mui/material/TablePagination';
 import { Box, Paper, Typography, LinearProgress } from '@mui/material';
 import FilterModal from './FilterModal';
 import LocationModal from './LocationModal';
+import { useSnackbar } from '../context/SnackbarContext';
 
 const mpgToKml = (mpg) => (mpg * 0.425144).toFixed(2);
 
@@ -62,6 +63,7 @@ const Table = () => {
   const [sortModel, setSortModel] = useState([]);
   const [tempFilters, setTempFilters] = useState(filters);
   const [loading, setLoading] = useState(false);
+  const { errorSnackbar } = useSnackbar();
 
   const columns = [
     {
@@ -174,6 +176,7 @@ const Table = () => {
       setOriginalRows(data);
       setLoading(false);
     } catch (error) {
+      errorSnackbar('Error con la conexion')
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
       setLoading(false);
     }
