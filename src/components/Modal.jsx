@@ -44,7 +44,7 @@ const translateType = (type) => {
   return typeTranslations[type.toLowerCase()] || type.toLowerCase();
 };
 
-const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFilters, resetFilters }) => {
+const Modal = ({ open, handleClose, filters, setFilters, applyFilters, resetFilters }) => {
   const [inputType, setInputType] = useState(filters.type);
   const [inputMake, setInputMake] = useState(filters.make);
   const [inputModel, setInputModel] = useState(filters.model);
@@ -137,7 +137,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
             fullWidth
             margin="dense"
           >
-            <MenuItem value="">Ninguna</MenuItem>
+            <MenuItem value="">Ambos</MenuItem>
             <MenuItem value="m">Mecánico</MenuItem>
             <MenuItem value="a">Automático</MenuItem>
           </TextField>

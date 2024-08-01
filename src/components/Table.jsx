@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TablePagination from '@mui/material/TablePagination';
-import { Box, Paper, Typography, TextField, MenuItem } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import Modal from './Modal';
 import LocationModal from './LocationModal';
 
@@ -34,14 +34,25 @@ const fuelTypeTranslations = {
   'electricity': 'Electricidad',
 };
 
+const inicialFilters = { 
+  type: '',
+  make: '',
+  model: '',
+  year: '',
+  transmission: '',
+  fuel_type: '',
+  city_mpg: [0, 50],
+  highway_mpg: [0, 50],
+  combination_mpg: [0, 50]
+};
+
 const Table = () => {
   const [originalRows, setOriginalRows] = useState([]);
-  const [rows, setRows] = useState([]);
   const [page, setPage] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState({ lat: 0, lng: 0 });
-  const [filters, setFilters] = useState({ type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] });
+  const [filters, setFilters] = useState(inicialFilters);
   const [filterOptions, setFilterOptions] = useState({ types: [], makes: [], models: [], years: [], transmissions: [] });
   const [selectedRow, setSelectedRow] = useState(null);
   const [sortModel, setSortModel] = useState([]);
@@ -126,7 +137,7 @@ const Table = () => {
     },
   ];
 
-  const fetchCarData = async (filtersToApply) => {
+  const fetchCarData = async () => {
     const apiUrl = `https://api.api-ninjas.com/v1/cars`;
     const apiKey = import.meta.env.VITE_API_KEY;
     
@@ -137,17 +148,16 @@ const Table = () => {
         },
         params: {
           limit: 50,
-          fuel_type: filtersToApply.fuel_type,
-          transmission: filtersToApply.transmission,
-          make: filtersToApply.make,
-          model: filtersToApply.model,
-          year: filtersToApply.year,
-          min_city_mpg: filtersToApply.city_mpg[0],
-          max_city_mpg: filtersToApply.city_mpg[1],
-          min_hwy_mpg: filtersToApply.highway_mpg[0],
-          max_hwy_mpg: filtersToApply.highway_mpg[1],
-          min_comb_mpg: filtersToApply.combination_mpg[0],
-          max_comb_mpg: filtersToApply.combination_mpg[1],
+          transmission: filters.transmission,
+          make: filters.make,
+          model: filters.model,
+          year: filters.year,
+          min_city_mpg: filters.city_mpg[0],
+          max_city_mpg: filters.city_mpg[1],
+          min_hwy_mpg: filters.highway_mpg[0],
+          max_hwy_mpg: filters.highway_mpg[1],
+          min_comb_mpg: filters.combination_mpg[0],
+          max_comb_mpg: filters.combination_mpg[1],
         },
       });
       const data = response.data.map((item, index) => ({
@@ -165,7 +175,6 @@ const Table = () => {
 
       setFilterOptions({ types, makes, models, years, transmissions });
       setOriginalRows(data);
-      setRows(applyTypeFilter(data, filtersToApply.type));
     } catch (error) {
       console.error('Error fetching data:', error.response ? error.response.data : error.message);
     }
@@ -178,7 +187,7 @@ const Table = () => {
 
   useEffect(() => {
     fetchCarData(filters);
-  }, [filters.fuel_type, filters.transmission, filters.make, filters.model, filters.year, filters.city_mpg, filters.highway_mpg, filters.combination_mpg]);
+  }, [filters]);
 
   const handleOpenModal = () => {
     setTempFilters(filters);
@@ -204,25 +213,12 @@ const Table = () => {
 
   const applyFilters = () => {
     setFilters(tempFilters);
-
-    const filteredRows = applyTypeFilter(originalRows, tempFilters.type).filter(row =>
-      (!tempFilters.make || row.make === tempFilters.make) &&
-      (!tempFilters.model || row.model === tempFilters.model) &&
-      (!tempFilters.year || row.year === tempFilters.year) &&
-      (!tempFilters.transmission || row.transmission === tempFilters.transmission) &&
-      (row.city_mpg >= tempFilters.city_mpg[0] && row.city_mpg <= tempFilters.city_mpg[1]) &&
-      (row.highway_mpg >= tempFilters.highway_mpg[0] && row.highway_mpg <= tempFilters.highway_mpg[1]) &&
-      (row.combination_mpg >= tempFilters.combination_mpg[0] && row.combination_mpg <= tempFilters.combination_mpg[1])
-    );
-    setRows(filteredRows);
     handleCloseModal();
   };
 
   const resetFilters = () => {
-    const initialFilters = { type: '', make: '', model: '', year: '', transmission: '', fuel_type: 'gas', city_mpg: [0, 50], highway_mpg: [0, 50], combination_mpg: [0, 50] };
-    setTempFilters(initialFilters);
-    setFilters(initialFilters);
-    setRows(originalRows);
+    setTempFilters(inicialFilters);
+    setFilters(inicialFilters);
   };
 
   const handleRowClick = (params) => {
@@ -240,8 +236,9 @@ const Table = () => {
 
   const visibleRows = useMemo(
     () => {
+      const filterRows = applyTypeFilter(originalRows, filters.type)
       const { field, sort } = sortModel[0] ?? {};
-      return [...rows].sort((a, b) => {
+      return [...filterRows].sort((a, b) => {
         if (a[field] < b[field]) {
           return sort === 'asc' ? -1 : 1;
         }
@@ -255,10 +252,10 @@ const Table = () => {
         (page * 20) + 20,
       )
     },
-    [rows, sortModel, page],
+    [originalRows, sortModel, page],
   );
 
-  const totalPages = Math.ceil(rows.length / 20);
+  const totalPages = Math.ceil(originalRows.length / 20);
   const validPage = Math.max(0, Math.min(page, totalPages - 1));
 
   return (
@@ -268,19 +265,6 @@ const Table = () => {
           Tabla de autos
         </Typography>
         <Box display="flex" alignItems="center">
-          <TextField
-            select
-            label="Tipo de Combustible"
-            value={filters.fuel_type}
-            onChange={(e) => setFilters((prev) => ({ ...prev, fuel_type: e.target.value, make: '', model: '', year: '' }))}
-            fullWidth
-            margin="dense"
-            sx={{ width: 200, marginRight: 2 }}
-          >
-            <MenuItem value="gas">Gasolina</MenuItem>
-            <MenuItem value="diesel">Diesel</MenuItem>
-            <MenuItem value="electricity">Electricidad</MenuItem>
-          </TextField>
           <IconButton 
             aria-label="filter" 
             onClick={handleOpenModal}
@@ -318,7 +302,7 @@ const Table = () => {
           />
           <TablePagination
             component='div'
-            count={rows.length}
+            count={originalRows.length}
             rowsPerPage={20}
             page={validPage}
             onPageChange={handleChangePage}
