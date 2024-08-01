@@ -1,8 +1,8 @@
-import { lime } from '@mui/material/colors';
+import { lightBlue } from '@mui/material/colors';
 
 const baseTheme = {
   primary: {
-    main: lime[50],
+    main: lightBlue[600],
   },
 };
 
