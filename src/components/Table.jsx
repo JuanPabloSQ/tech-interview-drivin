@@ -5,7 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import TablePagination from '@mui/material/TablePagination';
 import { Box, Paper, Typography, LinearProgress } from '@mui/material';
-import Modal from './Modal';
+import FilterModal from './FilterModal';
 import LocationModal from './LocationModal';
 
 const mpgToKml = (mpg) => (mpg * 0.425144).toFixed(2);
@@ -325,7 +325,7 @@ const Table = () => {
           )}
         </Paper>
       </Box>
-      <Modal
+      <FilterModal
         open={modalOpen}
         handleClose={handleCloseModal}
         filterOptions={filterOptions}

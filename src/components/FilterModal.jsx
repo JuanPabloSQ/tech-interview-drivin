@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Modal as MUIModal, Typography, Button, TextField, Slider, MenuItem } from '@mui/material';
+import { Box, Modal, Typography, Button, TextField, Slider, MenuItem } from '@mui/material';
 
 const style = {
   position: 'absolute',
@@ -44,7 +44,7 @@ const translateType = (type) => {
   return typeTranslations[type.toLowerCase()] || type.toLowerCase();
 };
 
-const Modal = ({ open, handleClose, filters, setFilters, applyFilters, resetFilters }) => {
+const FilterModal = ({ open, handleClose, filters, setFilters, applyFilters, resetFilters }) => {
   const [inputType, setInputType] = useState(filters.type);
   const [inputMake, setInputMake] = useState(filters.make);
   const [inputModel, setInputModel] = useState(filters.model);
@@ -95,7 +95,7 @@ const Modal = ({ open, handleClose, filters, setFilters, applyFilters, resetFilt
   };
 
   return (
-    <MUIModal open={open} onClose={handleClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
         <Typography variant="h6" component="h2">
           Filtrar Resultados
@@ -201,8 +201,8 @@ const Modal = ({ open, handleClose, filters, setFilters, applyFilters, resetFilt
           </Box>
         </Box>
       </Box>
-    </MUIModal>
+    </Modal>
   );
 };
 
-export default Modal;
+export default FilterModal;
