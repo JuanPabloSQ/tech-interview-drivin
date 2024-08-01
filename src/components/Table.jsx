@@ -142,6 +142,12 @@ const Table = () => {
           make: filtersToApply.make,
           model: filtersToApply.model,
           year: filtersToApply.year,
+          min_city_mpg: filtersToApply.city_mpg[0],
+          max_city_mpg: filtersToApply.city_mpg[1],
+          min_hwy_mpg: filtersToApply.highway_mpg[0],
+          max_hwy_mpg: filtersToApply.highway_mpg[1],
+          min_comb_mpg: filtersToApply.combination_mpg[0],
+          max_comb_mpg: filtersToApply.combination_mpg[1],
         },
       });
       const data = response.data.map((item, index) => ({
@@ -172,7 +178,7 @@ const Table = () => {
 
   useEffect(() => {
     fetchCarData(filters);
-  }, [filters.fuel_type, filters.transmission, filters.make, filters.model, filters.year]);
+  }, [filters.fuel_type, filters.transmission, filters.make, filters.model, filters.year, filters.city_mpg, filters.highway_mpg, filters.combination_mpg]);
 
   const handleOpenModal = () => {
     setTempFilters(filters);

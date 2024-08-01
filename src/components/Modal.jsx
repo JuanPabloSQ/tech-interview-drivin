@@ -74,6 +74,18 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
     setFilters((prev) => ({ ...prev, year: inputValue }));
   };
 
+  const handleCityMpgChange = (e, newValue) => {
+    setFilters((prev) => ({ ...prev, city_mpg: newValue }));
+  };
+
+  const handleHighwayMpgChange = (e, newValue) => {
+    setFilters((prev) => ({ ...prev, highway_mpg: newValue }));
+  };
+
+  const handleCombinationMpgChange = (e, newValue) => {
+    setFilters((prev) => ({ ...prev, combination_mpg: newValue }));
+  };
+
   const handleResetFilters = () => {
     setInputType('');
     setInputMake('');
@@ -134,7 +146,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           </Typography>
           <Slider
             value={filters.city_mpg}
-            onChange={(e, newValue) => setFilters((prev) => ({ ...prev, city_mpg: newValue }))}
+            onChange={handleCityMpgChange}
             valueLabelDisplay="auto"
             min={0}
             max={50}
@@ -149,7 +161,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           </Typography>
           <Slider
             value={filters.highway_mpg}
-            onChange={(e, newValue) => setFilters((prev) => ({ ...prev, highway_mpg: newValue }))}
+            onChange={handleHighwayMpgChange}
             valueLabelDisplay="auto"
             min={0}
             max={50}
@@ -164,7 +176,7 @@ const Modal = ({ open, handleClose, filterOptions, filters, setFilters, applyFil
           </Typography>
           <Slider
             value={filters.combination_mpg}
-            onChange={(e, newValue) => setFilters((prev) => ({ ...prev, combination_mpg: newValue }))}
+            onChange={handleCombinationMpgChange}
             valueLabelDisplay="auto"
             min={0}
             max={50}
