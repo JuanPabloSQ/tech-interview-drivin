@@ -1,4 +1,4 @@
-# Prueba tecnica DrivIn - Juan Pablo Sepulveda
+# Prueba técnica DrivIn - Juan Pablo Sepúlveda
 
 
 ## Descripción
